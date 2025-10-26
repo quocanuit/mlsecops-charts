@@ -1,0 +1,93 @@
+name: Deploy neccessary components to EKS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get AWS caller identity
+        id: caller-identity
+        run: |
+          CALLER_IDENTITY=$(aws sts get-caller-identity)
+          echo "Caller Identity: $CALLER_IDENTITY"
+          ACCOUNT_ID=$(echo $CALLER_IDENTITY | jq -r '.Account')
+          echo "Account ID: $ACCOUNT_ID"
+          echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
+
+      - name: Assume role
+        id: assume-role
+        run: |
+          ROLE_ARN="arn:aws:iam::${{ steps.caller-identity.outputs.account_id }}:role/GithubActions"
+          SESSION_NAME="actions-build-${{ github.run_id }}"
+
+          echo "Assuming role: $ROLE_ARN"
+          echo "Session name: $SESSION_NAME"
+
+          CREDENTIALS=$(aws sts assume-role \
+            --role-arn $ROLE_ARN \
+            --role-session-name $SESSION_NAME \
+            --output json)
+
+          echo "credentials<<EOF" >> $GITHUB_OUTPUT
+          echo "$CREDENTIALS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Export AWS credentials from assumed role
+        run: |
+          export AWS_ACCESS_KEY_ID=$(echo '${{ steps.assume-role.outputs.credentials }}' | jq -r '.Credentials.AccessKeyId')
+          export AWS_SECRET_ACCESS_KEY=$(echo '${{ steps.assume-role.outputs.credentials }}' | jq -r '.Credentials.SecretAccessKey')
+          export AWS_SESSION_TOKEN=$(echo '${{ steps.assume-role.outputs.credentials }}' | jq -r '.Credentials.SessionToken')
+
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
+
+          echo "AWS credentials exported from assumed role"
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name mlsecops-eks-cluster \
+            --region us-east-1
+          echo "Kubeconfig updated for mlsecops-eks-cluster"
+
+      - name: Verify cluster access
+        run: |
+          echo "Checking cluster nodes..."
+          kubectl get nodes
+          echo ""
+          echo "Successfully connected to EKS cluster"
+
+      - name: Install ArgoCD
+        run: |
+          cd scripts
+          chmod +x install.sh
+          ./install.sh
