@@ -1,4 +1,4 @@
 argo-cd:
   server:
     service:
-      type: NodePort
+      type: ClusterIP
