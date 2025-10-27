@@ -1,11 +1,8 @@
 #!/bin/bash
 
-set -e
-
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTER_NAME="mlsecops-eks-cluster"
 REGION="us-east-1"
-ROLE_NAME="DeveloperAccess"
 NAMESPACE="argocd"
 
 echo "ArgoCD EKS Access Setup"
@@ -21,7 +18,7 @@ CALLER_IDENTITY=$(aws sts get-caller-identity)
 ACCOUNT_ID=$(echo $CALLER_IDENTITY | jq -r '.Account')
 
 # Assume role
-ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
+ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/GithubActions"
 SESSION_NAME="dev-session-$(date +%s)"
 
 echo "Assuming role: $ROLE_ARN"
@@ -75,17 +72,15 @@ if kubectl get namespace $NAMESPACE >/dev/null 2>&1; then
     echo "ArgoCD Server Service:"
     kubectl get svc argo-cd-argocd-server -n $NAMESPACE
 
-    SERVICE_TYPE=$(kubectl get svc argo-cd-argocd-server -n $NAMESPACE -o jsonpath='{.spec.type}')
-
-    echo "ArgoCD Access Information"
-
+    echo ""
     echo "To access ArgoCD, use port-forwarding:"
+    echo ""
     echo "kubectl port-forward svc/argo-cd-argocd-server -n $NAMESPACE 8080:443"
-    echo "Then access: https://localhost:8080"
-    fi
-
-    echo "Username: admin"
-    echo "Get admin password:"
+    echo ""
+    echo "Access: https://localhost:8080"
+    echo "Username:"
+    echo "admin"
+    echo "Password:"
     echo "kubectl get secret argocd-initial-admin-secret -n $NAMESPACE -o jsonpath='{.data.password}' | base64 -d"
 
 else

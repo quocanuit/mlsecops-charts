@@ -17,7 +17,4 @@ helm upgrade --install argo-cd $CHART_PATH \
     --wait \
     --timeout 10m
 
-NODE_PORT_HTTPS=$(kubectl get svc argo-cd-argocd-server -n $NAMESPACE -o jsonpath='{.spec.ports[1].nodePort}')
-
 echo "ArgoCD installed!"
-echo "Running on port: ${NODE_PORT_HTTPS}"

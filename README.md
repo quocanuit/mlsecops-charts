@@ -5,6 +5,6 @@
 
 aws configure
 
-scripts/setup.sh
+source scripts/setup.sh
 
 ```
