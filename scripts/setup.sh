@@ -2,6 +2,7 @@
 
 set -e
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTER_NAME="mlsecops-eks-cluster"
 REGION="us-east-1"
 ROLE_NAME="DeveloperAccess"

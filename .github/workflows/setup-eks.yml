@@ -17,17 +17,13 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
+        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: 'latest'
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -88,6 +84,5 @@ jobs:
 
       - name: Install ArgoCD
         run: |
-          cd scripts
-          chmod +x install.sh
-          ./install-argo-cd.sh
+          chmod +x scripts/install-argo-cd.sh
+          .scripts/install-argo-cd.sh

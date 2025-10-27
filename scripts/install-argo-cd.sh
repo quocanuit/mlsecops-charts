@@ -2,8 +2,9 @@
 
 set -e
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NAMESPACE="argocd"
-CHART_PATH="../charts/argo-cd"
+CHART_PATH="${ROOT}/charts/argo-cd"
 
 echo "Installing ArgoCD..."
 
@@ -19,5 +20,4 @@ helm upgrade --install argo-cd $CHART_PATH \
 NODE_PORT_HTTPS=$(kubectl get svc argo-cd-argocd-server -n $NAMESPACE -o jsonpath='{.spec.ports[1].nodePort}')
 
 echo "ArgoCD installed!"
-echo "Access URLs:"
-echo "https://localhost:${NODE_PORT_HTTPS}"
+echo "Running on port: ${NODE_PORT_HTTPS}"
