@@ -52,21 +52,19 @@ jobs:
             --role-session-name $SESSION_NAME \
             --output json)
 
-          echo "credentials<<EOF" >> $GITHUB_OUTPUT
-          echo "$CREDENTIALS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          AWS_ACCESS_KEY_ID=$(echo "$CREDENTIALS" | jq -r '.Credentials.AccessKeyId')
+          AWS_SECRET_ACCESS_KEY=$(echo "$CREDENTIALS" | jq -r '.Credentials.SecretAccessKey')
+          AWS_SESSION_TOKEN=$(echo "$CREDENTIALS" | jq -r '.Credentials.SessionToken')
 
-      - name: Export AWS credentials from assumed role
-        run: |
-          export AWS_ACCESS_KEY_ID=$(echo '${{ steps.assume-role.outputs.credentials }}' | jq -r '.Credentials.AccessKeyId')
-          export AWS_SECRET_ACCESS_KEY=$(echo '${{ steps.assume-role.outputs.credentials }}' | jq -r '.Credentials.SecretAccessKey')
-          export AWS_SESSION_TOKEN=$(echo '${{ steps.assume-role.outputs.credentials }}' | jq -r '.Credentials.SessionToken')
+          echo "::add-mask::$AWS_ACCESS_KEY_ID"
+          echo "::add-mask::$AWS_SECRET_ACCESS_KEY"
+          echo "::add-mask::$AWS_SESSION_TOKEN"
 
           echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
 
-          echo "AWS credentials exported from assumed role"
+          echo "Role assumed and credentials configured"
 
       - name: Update kubeconfig for EKS
         run: |
@@ -85,4 +83,4 @@ jobs:
       - name: Install ArgoCD
         run: |
           chmod +x scripts/install-argo-cd.sh
-          .scripts/install-argo-cd.sh
+          ./scripts/install-argo-cd.sh
