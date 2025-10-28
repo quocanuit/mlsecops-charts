@@ -64,26 +64,30 @@ fi
 
 echo "Successfully connected to EKS cluster"
 
-# Check if ArgoCD is installed
-echo "Checking ArgoCD installation..."
+# Check installations and provide access information
+echo ""
+echo "Service Access Information"
+echo ""
+
+# Check ArgoCD
 if kubectl get namespace $NAMESPACE >/dev/null 2>&1; then
-    echo "ArgoCD namespace found"
-
-    echo "ArgoCD Server Service:"
-    kubectl get svc argo-cd-argocd-server -n $NAMESPACE
-
-    echo ""
-    echo "To access ArgoCD, use port-forwarding:"
-    echo ""
-    echo "kubectl port-forward svc/argo-cd-argocd-server -n $NAMESPACE 8080:443"
-    echo ""
-    echo "Access: https://localhost:8080"
-    echo "Username:"
-    echo "admin"
-    echo "Password:"
-    echo "kubectl get secret argocd-initial-admin-secret -n $NAMESPACE -o jsonpath='{.data.password}' | base64 -d"
-
+    echo "  ArgoCD"
+    echo "  Port-forward: kubectl port-forward svc/argo-cd-argocd-server -n $NAMESPACE 8080:443"
+    echo "  URL: http://localhost:8080"
+    echo "  Username: admin"
+    echo "  Password: kubectl get secret argocd-initial-admin-secret -n $NAMESPACE -o jsonpath='{.data.password}' | base64 -d"
 else
-    echo "ArgoCD namespace not found. ArgoCD may not be installed."
-    exit 1
+    echo "  ArgoCD not found"
+fi
+
+echo ""
+
+# Check Argo Workflows
+WORKFLOWS_NAMESPACE="argo-workflows"
+if kubectl get namespace $WORKFLOWS_NAMESPACE >/dev/null 2>&1; then
+    echo "  Argo Workflows"
+    echo "  Port-forward: kubectl port-forward svc/argo-workflows-server -n $WORKFLOWS_NAMESPACE 2746:2746"
+    echo "  URL: http://localhost:2746"
+else
+    echo "  Argo Workflows not found"
 fi

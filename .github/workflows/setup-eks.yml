@@ -84,3 +84,7 @@ jobs:
         run: |
           chmod +x scripts/install-argo-cd.sh
           ./scripts/install-argo-cd.sh
+
+      - name: Apply Argo Workflows Application
+        run: |
+          kubectl apply -f argocd-apps/argo-workflows.yaml
