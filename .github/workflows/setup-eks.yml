@@ -88,3 +88,7 @@ jobs:
       - name: Apply Argo Workflows Application
         run: |
           kubectl apply -f argocd-apps/argo-workflows.yaml
+
+      - name: Apply MLflow Application
+        run: |
+          kubectl apply -f argocd-apps/mlflow.yaml

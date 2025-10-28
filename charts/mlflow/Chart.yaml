@@ -1,0 +1,8 @@
+apiVersion: v2
+name: mlflow
+version: 1.0.0
+description: A Helm chart for MLflow tracking server
+dependencies:
+  - name: mlflow
+    version: 1.7.3
+    repository: https://community-charts.github.io/helm-charts

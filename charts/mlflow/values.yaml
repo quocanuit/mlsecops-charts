@@ -1,0 +1,10 @@
+# MLflow Tracking Server configuration
+
+artifactRoot:
+  s3:
+    enabled: true
+    bucket: "mlsecops-mlflow-artifacts"
+
+service:
+  type: ClusterIP
+  port: 5000
