@@ -6,6 +6,7 @@ REGION="us-east-1"
 NAMESPACE="argocd"
 
 echo "ArgoCD EKS Access Setup"
+echo ""
 
 echo "Checking required tools..."
 command -v aws >/dev/null 2>&1 || { echo "AWS CLI is required but not installed. Aborting."; return 1 2>/dev/null || exit 1; }
@@ -71,94 +72,87 @@ fi
 
 echo "Successfully connected to EKS cluster"
 
-# Check installations and set up port forwarding
+# Check installations and provide access information
 echo ""
-echo "Setting up port forwarding for services..."
+echo "Available Services"
 echo ""
 
-# Arrays to store service information
-declare -a SERVICES
-declare -a LINKS
-declare -a STATUSES
-declare -a PIDS
+# Arrays to store service information - clear them first
+SERVICES=()
+PORT_FORWARDS=()
+ACCESS_INFO=()
 
 # Check ArgoCD
 if kubectl get namespace $NAMESPACE >/dev/null 2>&1; then
-    kubectl port-forward svc/argo-cd-argocd-server -n $NAMESPACE 8080:80 > /dev/null 2>&1 &
-    PID=$!
     export ARGOCD_PASS=$(kubectl get secret argocd-initial-admin-secret -n $NAMESPACE -o jsonpath='{.data.password}' 2>/dev/null | base64 -d)
 
     SERVICES+=("ArgoCD")
-    LINKS+=("http://localhost:8080|User: admin|Pass: echo \$ARGOCD_PASS")
-    STATUSES+=("Active")
-    PIDS+=("$PID")
+    PORT_FORWARDS+=("kubectl port-forward svc/argo-cd-argocd-server -n $NAMESPACE 8080:80 > /dev/null 2>&1 &")
+    ACCESS_INFO+=("http://localhost:8080|User: admin|Pass: echo \$ARGOCD_PASS")
 else
     SERVICES+=("ArgoCD")
-    LINKS+=("-")
-    STATUSES+=("Not Found")
-    PIDS+=("-")
+    PORT_FORWARDS+=("")
+    ACCESS_INFO+=("Not installed")
 fi
 
 # Check Argo Workflows
 WORKFLOWS_NAMESPACE="argo-workflows"
 if kubectl get namespace $WORKFLOWS_NAMESPACE >/dev/null 2>&1; then
-    kubectl port-forward svc/argo-workflows-server -n $WORKFLOWS_NAMESPACE 2746:2746 > /dev/null 2>&1 &
-    PID=$!
-
     SERVICES+=("Argo Workflows")
-    LINKS+=("http://localhost:2746")
-    STATUSES+=("Active")
-    PIDS+=("$PID")
+    PORT_FORWARDS+=("kubectl port-forward svc/argo-workflows-server -n $WORKFLOWS_NAMESPACE 2746:2746 > /dev/null 2>&1 &")
+    ACCESS_INFO+=("http://localhost:2746")
 else
     SERVICES+=("Argo Workflows")
-    LINKS+=("-")
-    STATUSES+=("Not Found")
-    PIDS+=("-")
+    PORT_FORWARDS+=("")
+    ACCESS_INFO+=("Not installed")
 fi
 
 # Check MLflow
 MLFLOW_NAMESPACE="mlflow"
 if kubectl get namespace $MLFLOW_NAMESPACE >/dev/null 2>&1; then
-    kubectl port-forward svc/mlflow -n $MLFLOW_NAMESPACE 5000:5000 > /dev/null 2>&1 &
-    PID=$!
-
     SERVICES+=("MLflow")
-    LINKS+=("http://localhost:5000")
-    STATUSES+=("Active")
-    PIDS+=("$PID")
+    PORT_FORWARDS+=("kubectl port-forward svc/mlflow -n $MLFLOW_NAMESPACE 5000:80 > /dev/null 2>&1 &")
+    ACCESS_INFO+=("http://localhost:5000")
 else
     SERVICES+=("MLflow")
-    LINKS+=("-")
-    STATUSES+=("Not Found")
-    PIDS+=("-")
+    PORT_FORWARDS+=("")
+    ACCESS_INFO+=("Not installed")
 fi
 
 # Print table
-echo "╔════════════════════╤════════════════════════════════════════╤════════════╤═══════╗"
-echo "║ Service            │ Access                                 │ Status     │ PID   ║"
-echo "╠════════════════════╪════════════════════════════════════════╪════════════╪═══════╣"
+echo "╔════════════════════╤════════════════════════════════════════╗"
+echo "║ Service            │ Access                                 ║"
+echo "╠════════════════════╪════════════════════════════════════════╣"
 
 for i in "${!SERVICES[@]}"; do
     SERVICE="${SERVICES[$i]}"
-    LINK="${LINKS[$i]}"
-    STATUS="${STATUSES[$i]}"
-    PID="${PIDS[$i]}"
+    ACCESS="${ACCESS_INFO[$i]}"
 
-    IFS='|' read -ra LINK_PARTS <<< "$LINK"
+    IFS='|' read -ra ACCESS_PARTS <<< "$ACCESS"
 
-    printf "║ %-18s │ %-38s │ %-10s │ %-5s ║\n" "$SERVICE" "${LINK_PARTS[0]}" "$STATUS" "$PID"
+    printf "║ %-18s │ %-38s ║\n" "$SERVICE" "${ACCESS_PARTS[0]}"
 
-    for ((j=1; j<${#LINK_PARTS[@]}; j++)); do
-        printf "║ %-18s │ %-38s │ %-10s │ %-5s ║\n" "" "${LINK_PARTS[$j]}" "" ""
+    for ((j=1; j<${#ACCESS_PARTS[@]}; j++)); do
+        printf "║ %-18s │ %-38s ║\n" "" "${ACCESS_PARTS[$j]}"
     done
 
     if [ $i -lt $((${#SERVICES[@]} - 1)) ]; then
-        echo "╟────────────────────┼────────────────────────────────────────┼────────────┼───────╢"
+        echo "╟────────────────────┼────────────────────────────────────────╢"
     fi
 done
 
-echo "╚════════════════════╧════════════════════════════════════════╧════════════╧═══════╝"
+echo "╚════════════════════╧════════════════════════════════════════╝"
 echo ""
-echo "Note: Port forwarding is running in background. To stop all port forwards:"
-echo "      kill ${PIDS[@]}"
+echo "Port-forward commands:"
+
+# Print port-forward commands
+for i in "${!SERVICES[@]}"; do
+    if [ -n "${PORT_FORWARDS[$i]}" ]; then
+        echo "${SERVICES[$i]}:"
+        echo "  ${PORT_FORWARDS[$i]}"
+    fi
+done
+
+echo ""
+echo "Note: Run the port-forward commands before accessing the service"
 echo ""
