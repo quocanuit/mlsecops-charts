@@ -92,3 +92,7 @@ jobs:
       - name: Apply MLflow Application
         run: |
           kubectl apply -f argocd-apps/mlflow.yaml
+
+      - name: Apply Kubernetes configurations
+        run: |
+          kubectl apply -f k8s/
