@@ -111,7 +111,7 @@ fi
 MLFLOW_NAMESPACE="mlflow"
 if kubectl get namespace $MLFLOW_NAMESPACE >/dev/null 2>&1; then
     SERVICES+=("MLflow")
-    PORT_FORWARDS+=("kubectl port-forward svc/mlflow -n $MLFLOW_NAMESPACE 5000:80 > /dev/null 2>&1 &")
+    PORT_FORWARDS+=("kubectl port-forward svc/mlflow -n $MLFLOW_NAMESPACE 5000:5000 > /dev/null 2>&1 &")
     ACCESS_INFO+=("http://localhost:5000")
 else
     SERVICES+=("MLflow")
