@@ -22,6 +22,11 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4
 
+      - name: Install ArgoCD CLI
+        uses: clowdhaus/argo-cd-action@493a6015c2003723ec025e14242d65741979a49b
+        with:
+          version: 3.2.0
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
         with:
@@ -85,17 +90,9 @@ jobs:
           chmod +x scripts/install-argo-cd.sh
           ./scripts/install-argo-cd.sh
 
-      - name: Apply Argo Workflows Application
+      - name: Bootstrap Argo Apps
         run: |
-          kubectl apply -f argocd-apps/argo-workflows.yaml
-
-      - name: Apply MLflow Application
-        run: |
-          kubectl apply -f argocd-apps/mlflow.yaml
-
-      - name: Apply Vault Application
-        run: |
-          kubectl apply -f argocd-apps/vault.yaml
+          kubectl apply -f bootstrap.yaml
 
       - name: Check created namespaces
         run: |
@@ -109,7 +106,3 @@ jobs:
           echo "vault namespace created"
 
           echo "All namespaces ready!"
-
-      - name: Apply Kubernetes configurations
-        run: |
-          kubectl apply -f k8s/
