@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bootstrap-config
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+  - list:
+      elements:
+        - chart: vault
+          name: vault
+          repo: https://helm.releases.hashicorp.com
+          revision: 0.31.0
+          namespace: vault
+          postInstall: false
+
+        # - chart: cert-manager
+        #   name: cert-manager
+        #   repo: https://charts.jetstack.io
+        #   revision: v1.14.4
+        #   namespace: cert-manager
+        #   postInstall: false
+
+        - chart: mlflow
+          name: mlflow
+          repo: https://community-charts.github.io/helm-charts
+          revision: 1.7.3
+          namespace: mlflow
+          postInstall: false
+
+        - chart: argo-workflows
+          name: argo-workflows
+          repo: https://argoproj.github.io/argo-helm
+          revision: 0.45.27
+          namespace: argo-workflows
+          postInstall: true
+
+  template:
+    metadata:
+      name: '{{.name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: "1"
+    spec:
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
+      destination:
+        namespace: '{{.namespace}}'
+        server: https://kubernetes.default.svc
+      project: default
+  templatePatch: |
+    spec:
+      sources:
+        # Helm chart from upstream repository
+        - repoURL: '{{ .repo }}'
+          chart: '{{ .chart }}'
+          targetRevision: '{{ .revision }}'
+          helm:
+            valueFiles:
+              - $values/bootstrap/values/{{ .name }}/values.yaml
+        # Reference to this Git repository for values files
+        - repoURL: https://github.com/quocanuit/mlsecops-charts.git
+          targetRevision: master
+          ref: values
+        # Additional configuration/CRDs from apps directory
+        {{- if .postInstall }}
+        - repoURL: https://github.com/quocanuit/mlsecops-charts.git
+          targetRevision: master
+          path: apps/{{ .name }}
+        {{- end }}

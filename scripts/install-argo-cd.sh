@@ -38,7 +38,7 @@ done
 argocd login localhost:8080 --username admin --password "$ARGOCD_PASSWORD" --insecure
 
 echo "Adding repository to ArgoCD..."
-argocd repo add https://github.com/quocanuit/just-test.git --type git --insecure
+argocd repo add https://github.com/quocanuit/mlsecops-charts.git --type git --insecure
 
 echo "Cleaning up..."
 kill $PORT_FORWARD_PID || true
