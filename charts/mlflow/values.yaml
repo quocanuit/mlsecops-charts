@@ -4,6 +4,10 @@ mlflow:
       enabled: true
       bucket: "mlsecops-mlflow-artifacts"
 
+  backendStore:
+    database:
+      uri: sqlite:///mlflow.db
+
   service:
     type: ClusterIP
     port: 5000
