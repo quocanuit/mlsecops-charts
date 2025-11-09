@@ -1,0 +1,7 @@
+clusterName: mlsecops-eks-cluster
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::625715126488:role/AWSLoadBalancerControllerRole

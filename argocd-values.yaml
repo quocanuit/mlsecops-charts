@@ -2,6 +2,10 @@ argo-cd:
   server:
     service:
       type: ClusterIP
+    # Configure ArgoCD to work behind a reverse proxy with path-based routing
+    extraArgs:
+      - --basehref=/argocd
+      - --rootpath=/argocd
     resources:
       limits:
         cpu: 250m

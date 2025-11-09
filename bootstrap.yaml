@@ -8,12 +8,12 @@ spec:
   generators:
   - list:
       elements:
-        - chart: vault
-          name: vault
-          repo: https://helm.releases.hashicorp.com
-          revision: 0.31.0
-          namespace: vault
-          postInstall: false
+        # - chart: vault
+        #   name: vault
+        #   repo: https://helm.releases.hashicorp.com
+        #   revision: 0.31.0
+        #   namespace: vault
+        #   postInstall: false
 
         # - chart: cert-manager
         #   name: cert-manager
@@ -34,6 +34,13 @@ spec:
           repo: https://argoproj.github.io/argo-helm
           revision: 0.45.27
           namespace: argo-workflows
+          postInstall: true
+
+        - chart: aws-load-balancer-controller
+          name: aws-load-balancer-controller
+          repo: https://aws.github.io/eks-charts
+          revision: 1.14.1
+          namespace: kube-system
           postInstall: true
 
   template:
