@@ -96,11 +96,11 @@ jobs:
 
       - name: Check created namespaces
         run: |
-          # timeout 300 bash -c 'until kubectl get namespace argo-workflows &> /dev/null; do echo "Waiting for argo-workflows namespace..."; sleep 5; done'
-          # echo "argo-workflows namespace created"
+          timeout 300 bash -c 'until kubectl get namespace argo-workflows &> /dev/null; do echo "Waiting for argo-workflows namespace..."; sleep 5; done'
+          echo "argo-workflows namespace created"
 
-          # timeout 300 bash -c 'until kubectl get namespace mlflow &> /dev/null; do echo "Waiting for mlflow namespace..."; sleep 5; done'
-          # echo "mlflow namespace created"
+          timeout 300 bash -c 'until kubectl get namespace mlflow &> /dev/null; do echo "Waiting for mlflow namespace..."; sleep 5; done'
+          echo "mlflow namespace created"
 
           # timeout 300 bash -c 'until kubectl get namespace vault &> /dev/null; do echo "Waiting for vault namespace..."; sleep 5; done'
           # echo "vault namespace created"

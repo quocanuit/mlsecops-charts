@@ -2,10 +2,6 @@ argo-cd:
   server:
     service:
       type: ClusterIP
-    # Configure ArgoCD to work behind a reverse proxy with path-based routing
-    extraArgs:
-      - --basehref=/argocd
-      - --rootpath=/argocd
     resources:
       limits:
         cpu: 250m
@@ -13,6 +9,10 @@ argo-cd:
       requests:
         cpu: 100m
         memory: 100Mi
+
+  # Disable Dex (SSO)
+  dex:
+    enabled: false
 
   applicationSet:
     resources:
@@ -23,6 +23,10 @@ argo-cd:
         cpu: 100m
         memory: 150Mi
 
+  # Disable notifications controller
+  notifications:
+    enabled: false
+
   repo:
     resources:
       limits:
@@ -31,16 +35,6 @@ argo-cd:
       requests:
         cpu: 100m
         memory: 128Mi
-
-  sso:
-    dex:
-      resources:
-        limits:
-          cpu: 200m
-          memory: 128Mi
-        requests:
-          cpu: 50m
-          memory: 64Mi
 
   redis:
     resources:

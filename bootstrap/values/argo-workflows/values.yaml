@@ -2,7 +2,6 @@ server:
   enabled: true
   extraArgs:
     - --auth-mode=server
-    - --base-href=/workflows/
   resources:
     requests:
       cpu: 250m
