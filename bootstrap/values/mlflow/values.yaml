@@ -9,6 +9,3 @@ resources:
   limits:
     cpu: 1000m
     memory: 1Gi
-
-extraArgs:
-  disable-security-middleware
