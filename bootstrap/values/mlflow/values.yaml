@@ -10,5 +10,9 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
+gunicornOpts: ""
+
+uvicornOpts: "--log-level info"
+
 extraArgs:
   allowed-hosts: "mlflow.lastdanceuit.io.vn,localhost,127.0.0.1"
