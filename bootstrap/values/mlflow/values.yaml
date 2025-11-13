@@ -10,9 +10,10 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
-gunicornOpts: ""
+log:
+  enabled: false
 
-uvicornOpts: "--log-level info"
-
+# Use the chart's key=value args renderer
 extraArgs:
   allowed-hosts: "mlflow.lastdanceuit.io.vn,localhost,127.0.0.1"
+  uvicorn-opts: "--log-level info"
