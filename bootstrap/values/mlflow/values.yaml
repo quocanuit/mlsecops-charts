@@ -12,4 +12,4 @@ resources:
 
 extraArgs:
   host: 0.0.0.0
-  allowed-hosts: mlflow.annq.io.vn
+  allowed-hosts: mlflow.lastdanceuit.io.vn
