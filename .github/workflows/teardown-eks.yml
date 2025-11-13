@@ -1,0 +1,214 @@
+name: Teardown all components from EKS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede
+
+      - name: Install Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get AWS caller identity
+        id: caller-identity
+        run: |
+          CALLER_IDENTITY=$(aws sts get-caller-identity)
+          echo "Caller Identity: $CALLER_IDENTITY"
+          ACCOUNT_ID=$(echo $CALLER_IDENTITY | jq -r '.Account')
+          echo "Account ID: $ACCOUNT_ID"
+          echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
+
+      - name: Assume role
+        id: assume-role
+        run: |
+          ROLE_ARN="arn:aws:iam::${{ steps.caller-identity.outputs.account_id }}:role/GithubActions"
+          SESSION_NAME="actions-teardown-${{ github.run_id }}"
+
+          echo "Assuming role: $ROLE_ARN"
+          echo "Session name: $SESSION_NAME"
+
+          CREDENTIALS=$(aws sts assume-role \
+            --role-arn $ROLE_ARN \
+            --role-session-name $SESSION_NAME \
+            --output json)
+
+          AWS_ACCESS_KEY_ID=$(echo "$CREDENTIALS" | jq -r '.Credentials.AccessKeyId')
+          AWS_SECRET_ACCESS_KEY=$(echo "$CREDENTIALS" | jq -r '.Credentials.SecretAccessKey')
+          AWS_SESSION_TOKEN=$(echo "$CREDENTIALS" | jq -r '.Credentials.SessionToken')
+
+          echo "::add-mask::$AWS_ACCESS_KEY_ID"
+          echo "::add-mask::$AWS_SECRET_ACCESS_KEY"
+          echo "::add-mask::$AWS_SESSION_TOKEN"
+
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
+
+          echo "Role assumed and credentials configured"
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name mlsecops-eks-cluster \
+            --region us-east-1
+          echo "Kubeconfig updated for mlsecops-eks-cluster"
+
+      - name: Verify cluster access
+        run: |
+          echo "Checking cluster nodes..."
+          kubectl get nodes
+          echo ""
+          echo "Successfully connected to EKS cluster"
+
+      - name: Delete Kubernetes configurations
+        run: |
+          echo "Deleting Ingress resources..."
+          kubectl delete -f k8s/ingress.yaml --ignore-not-found=true || true
+
+          echo "Deleting ClusterIssuer..."
+          kubectl delete -f k8s/cluster-issuer.yaml --ignore-not-found=true || true
+
+          echo "Kubernetes configurations deleted"
+
+      - name: Delete TLS Secrets
+        run: |
+          echo "Deleting TLS secrets..."
+          kubectl delete secret argocd-lastdanceuit-io-vn -n argocd --ignore-not-found=true || true
+          kubectl delete secret mlflow-lastdanceuit-io-vn -n mlflow --ignore-not-found=true || true
+          kubectl delete secret workflows-lastdanceuit-io-vn -n argo-workflows --ignore-not-found=true || true
+          echo "TLS secrets deleted"
+
+      - name: Delete Bootstrap ApplicationSet
+        run: |
+          echo "Deleting ArgoCD ApplicationSet..."
+          kubectl delete -f bootstrap.yaml --ignore-not-found=true || true
+
+          echo "Waiting for ArgoCD to clean up applications..."
+          sleep 30
+
+          echo "Bootstrap ApplicationSet deleted"
+
+      - name: Delete ArgoCD Applications manually
+        run: |
+          echo "Deleting ArgoCD Applications..."
+          kubectl delete application mlflow -n argocd --ignore-not-found=true || true
+          kubectl delete application argo-workflows -n argocd --ignore-not-found=true || true
+
+          echo "Waiting for applications to be removed..."
+          sleep 20
+
+          echo "ArgoCD Applications deleted"
+
+      - name: Delete LoadBalancer Services
+        run: |
+          echo "Deleting LoadBalancer services..."
+          kubectl delete svc --all-namespaces --field-selector spec.type=LoadBalancer --ignore-not-found=true || true
+
+          echo "Waiting for LoadBalancers to be terminated..."
+          sleep 30
+
+          echo "LoadBalancer services deleted"
+
+      - name: Uninstall Argo Workflows
+        run: |
+          echo "Uninstalling Argo Workflows..."
+          helm uninstall argo-workflows -n argo-workflows --ignore-not-found || true
+
+          echo "Waiting for Argo Workflows to be removed..."
+          sleep 15
+
+          echo "Argo Workflows uninstalled"
+
+      - name: Uninstall MLflow
+        run: |
+          echo "Uninstalling MLflow..."
+          helm uninstall mlflow -n mlflow --ignore-not-found || true
+
+          echo "Waiting for MLflow to be removed..."
+          sleep 15
+
+          echo "MLflow uninstalled"
+
+      - name: Delete application namespaces
+        run: |
+          echo "Deleting application namespaces..."
+          kubectl delete namespace argo-workflows --ignore-not-found=true || true
+          kubectl delete namespace mlflow --ignore-not-found=true || true
+
+          echo "Waiting for namespaces to be terminated..."
+          timeout 180 bash -c 'while kubectl get namespace argo-workflows &> /dev/null; do echo "Waiting for argo-workflows namespace to be deleted..."; sleep 5; done' || true
+          timeout 180 bash -c 'while kubectl get namespace mlflow &> /dev/null; do echo "Waiting for mlflow namespace to be deleted..."; sleep 5; done' || true
+
+          echo "Application namespaces deleted"
+
+      - name: Uninstall ArgoCD
+        run: |
+          echo "Uninstalling ArgoCD..."
+          helm uninstall argo-cd -n argocd --ignore-not-found || true
+
+          echo "Waiting for ArgoCD to be removed..."
+          sleep 20
+
+          echo "ArgoCD uninstalled"
+
+      - name: Delete ArgoCD namespace
+        run: |
+          echo "Deleting ArgoCD namespace..."
+          kubectl delete namespace argocd --ignore-not-found=true || true
+
+          echo "Waiting for argocd namespace to be terminated..."
+          timeout 180 bash -c 'while kubectl get namespace argocd &> /dev/null; do echo "Waiting for argocd namespace to be deleted..."; sleep 5; done' || true
+
+          echo "ArgoCD namespace deleted"
+
+      - name: Clean up PVCs
+        run: |
+          echo "Cleaning up any remaining PVCs..."
+          kubectl delete pvc --all --all-namespaces --ignore-not-found=true || true
+
+          echo "PVCs cleaned up"
+
+      - name: Clean up PVs
+        run: |
+          echo "Cleaning up any remaining PVs..."
+          kubectl delete pv --all --ignore-not-found=true || true
+
+          echo "PVs cleaned up"
+
+      - name: Verify cleanup
+        run: |
+          echo "Verifying cleanup..."
+          echo ""
+          echo "Remaining namespaces:"
+          kubectl get namespaces | grep -E "(argocd|mlflow|argo-workflows)" || echo "No target namespaces found"
+          echo ""
+          echo "Remaining PVCs:"
+          kubectl get pvc --all-namespaces || echo "No PVCs found"
+          echo ""
+          echo "Remaining PVs:"
+          kubectl get pv || echo "No PVs found"
+          echo ""
+          echo "Remaining LoadBalancer services:"
+          kubectl get svc --all-namespaces --field-selector spec.type=LoadBalancer || echo "No LoadBalancer services found"
+          echo ""
+          echo "Teardown verification complete!"
