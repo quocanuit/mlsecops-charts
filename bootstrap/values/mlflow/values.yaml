@@ -11,8 +11,6 @@ resources:
     memory: 1Gi
 
 extraArgs:
-  - server
-  - --host
-  - 0.0.0.0
-  - --allowed-hosts
-  - mlflow.lastdanceuit.io.vn
+  server: true
+  host: 0.0.0.0
+  allowed-hosts: mlflow.lastdanceuit.io.vn

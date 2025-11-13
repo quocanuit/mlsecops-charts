@@ -11,9 +11,9 @@ kubectl get ingress -n argocd argocd -o jsonpath='{.status.loadBalancer.ingress[
 ## 2. Configure DNS Records
 
 In your DNS settings, create CNAME records pointing to the ELB DNS for:
-- `argocd.annq.io.vn`
-- `mlflow.annq.io.vn`
-- `workflows.annq.io.vn`
+- `argocd.lastdanceuit.io.vn`
+- `mlflow.lastdanceuit.io.vn`
+- `workflows.lastdanceuit.io.vn`
 
 ## 3. Verify SSL Certificates
 
