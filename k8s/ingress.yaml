@@ -33,10 +33,6 @@ metadata:
   namespace: mlflow
   annotations:
     cert-manager.io/cluster-issuer: http-01-production
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      proxy_set_header Host $host;
-      proxy_set_header X-Forwarded-Host $host;
-      proxy_set_header X-Forwarded-Proto $scheme;
 spec:
   ingressClassName: external-nginx
   rules:
