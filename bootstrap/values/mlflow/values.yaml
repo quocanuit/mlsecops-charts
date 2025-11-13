@@ -10,5 +10,5 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
-extraFlags:
-  - allowed-hosts=mlflow.lastdanceuit.io.vn,localhost,127.0.0.1
+extraArgs:
+  allowed-hosts: "mlflow.lastdanceuit.io.vn,localhost,127.0.0.1"
