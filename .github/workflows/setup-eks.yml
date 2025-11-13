@@ -106,3 +106,7 @@ jobs:
           # echo "vault namespace created"
 
           echo "All namespaces ready!"
+
+      - name: Apply Kubernetes configurations
+        run: |
+          kubectl apply -f k8s/

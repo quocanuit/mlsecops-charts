@@ -1,0 +1,77 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    cert-manager.io/cluster-issuer: http-01-production
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+  ingressClassName: external-nginx
+  rules:
+    - host: argocd.lastdanceuit.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argo-cd-argocd-server
+                port:
+                  number: 443
+  tls:
+    - hosts:
+        - argocd.lastdanceuit.io.vn
+      secretName: argocd-lastdanceuit-io-vn
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mlflow
+  namespace: mlflow
+  annotations:
+    cert-manager.io/cluster-issuer: http-01-production
+spec:
+  ingressClassName: external-nginx
+  rules:
+    - host: mlflow.lastdanceuit.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mlflow
+                port:
+                  number: 5000
+  tls:
+    - hosts:
+        - mlflow.lastdanceuit.io.vn
+      secretName: mlflow-lastdanceuit-io-vn
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argo-workflows
+  namespace: argo-workflows
+  annotations:
+    cert-manager.io/cluster-issuer: http-01-production
+spec:
+  ingressClassName: external-nginx
+  rules:
+    - host: workflows.lastdanceuit.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argo-workflows-server
+                port:
+                  number: 2746
+  tls:
+    - hosts:
+        - workflows.lastdanceuit.io.vn
+      secretName: workflows-lastdanceuit-io-vn

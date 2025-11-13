@@ -1,55 +1,54 @@
-argo-cd:
-  server:
-    service:
-      type: ClusterIP
-    resources:
-      limits:
-        cpu: 250m
-        memory: 200Mi
-      requests:
-        cpu: 100m
-        memory: 100Mi
+server:
+  service:
+    type: ClusterIP
+  resources:
+    limits:
+      cpu: 250m
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
 
-  # Disable Dex (SSO)
-  dex:
-    enabled: false
+# Disable Dex (SSO)
+dex:
+  enabled: false
 
-  applicationSet:
-    resources:
-      limits:
-        cpu: 300m
-        memory: 300Mi
-      requests:
-        cpu: 100m
-        memory: 150Mi
+applicationSet:
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 100m
+      memory: 150Mi
 
-  # Disable notifications controller
-  notifications:
-    enabled: false
+# Disable notifications controller
+notifications:
+  enabled: false
 
-  repo:
-    resources:
-      limits:
-        cpu: 300m
-        memory: 256Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
+repoServer:
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
-  redis:
-    resources:
-      limits:
-        cpu: 150m
-        memory: 128Mi
-      requests:
-        cpu: 50m
-        memory: 64Mi
+redis:
+  resources:
+    limits:
+      cpu: 150m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
-  controller:
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 200m
-        memory: 256Mi
+controller:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
