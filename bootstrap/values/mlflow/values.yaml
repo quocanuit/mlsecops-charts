@@ -9,3 +9,7 @@ resources:
   limits:
     cpu: 1000m
     memory: 1Gi
+
+env:
+  - name: MLFLOW_SERVER_ALLOWED_HOSTS
+    value: "mlflow.lastdanceuit.io.vn,localhost,127.0.0.1"
