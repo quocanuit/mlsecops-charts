@@ -19,14 +19,5 @@ extraArgs:
   backend-store-uri: "$(MLFLOW_BACKEND_URI)"
   default-artifact-root: "$(MLFLOW_S3_BUCKET)"
 
-extraEnvVars:
-  MLFLOW_BACKEND_URI:
-    valueFrom:
-      secretKeyRef:
-        name: mlflow-secrets
-        key: MLFLOW_BACKEND_URI
-  MLFLOW_S3_BUCKET:
-    valueFrom:
-      secretKeyRef:
-        name: mlflow-secrets
-        key: MLFLOW_S3_BUCKET
+extraSecretNamesForEnvFrom:
+  - mlflow-secrets
