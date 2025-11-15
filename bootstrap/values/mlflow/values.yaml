@@ -13,7 +13,6 @@ resources:
 log:
   enabled: false
 
-# Use the chart's key=value args renderer
 extraArgs:
-  allowed-hosts: "mlflow.lastdanceuit.io.vn,localhost,127.0.0.1"
+  allowed-hosts: "mlflow.lastdanceuit.io.vn,mlflow.mlflow.svc.cluster.local:5000"
   uvicorn-opts: "--log-level info"
