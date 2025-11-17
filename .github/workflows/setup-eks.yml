@@ -90,6 +90,11 @@ jobs:
           chmod +x scripts/install-argo-cd.sh
           ./scripts/install-argo-cd.sh
 
+      - name: Create MLflow Secret
+        run: |
+          chmod +x scripts/create-mlflow-secret.sh
+          ./scripts/create-mlflow-secret.sh
+
       - name: Bootstrap Argo Apps
         run: |
           kubectl apply -f bootstrap.yaml

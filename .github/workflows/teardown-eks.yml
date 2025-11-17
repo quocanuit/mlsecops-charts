@@ -98,6 +98,12 @@ jobs:
           kubectl delete secret workflows-lastdanceuit-io-vn -n argo-workflows --ignore-not-found=true || true
           echo "TLS secrets deleted"
 
+      - name: Delete MLflow Secret
+        run: |
+          echo "Deleting MLflow secret..."
+          kubectl delete secret mlflow-secrets -n mlflow --ignore-not-found=true || true
+          echo "MLflow secret deleted"
+
       - name: Delete Bootstrap ApplicationSet
         run: |
           echo "Deleting ArgoCD ApplicationSet..."
