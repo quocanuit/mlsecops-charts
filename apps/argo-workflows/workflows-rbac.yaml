@@ -4,8 +4,6 @@ kind: ServiceAccount
 metadata:
   name: argo-workflow
   namespace: argo-workflows
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::625715126488:role/GithubActions
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
