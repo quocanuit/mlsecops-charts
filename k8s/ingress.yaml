@@ -58,6 +58,9 @@ metadata:
   namespace: argo-workflows
   annotations:
     cert-manager.io/cluster-issuer: http-01-production
+    nginx.ingress.kubernetes.io/websocket-services: "argo-workflows-server"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
   ingressClassName: external-nginx
   rules:
