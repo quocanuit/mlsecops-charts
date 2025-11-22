@@ -15,18 +15,18 @@ spec:
         #   namespace: vault
         #   postInstall: false
 
-        - chart: mlflow
-          name: mlflow
-          repo: https://community-charts.github.io/helm-charts
-          revision: 1.7.3
-          namespace: mlflow
-          postInstall: false
-
         - chart: argo-workflows
           name: argo-workflows
           repo: https://argoproj.github.io/argo-helm
           revision: 0.45.27
           namespace: argo-workflows
+          postInstall: true
+
+        - chart: mlflow
+          name: mlflow
+          repo: https://community-charts.github.io/helm-charts
+          revision: 1.7.3
+          namespace: mlflow
           postInstall: true
 
   template:
