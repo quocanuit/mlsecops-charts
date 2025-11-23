@@ -78,3 +78,35 @@ spec:
     - hosts:
         - workflows.lastdanceuit.io.vn
       secretName: workflows-lastdanceuit-io-vn
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: model-serving
+  namespace: mlflow
+  annotations:
+    cert-manager.io/cluster-issuer: http-01-production
+spec:
+  ingressClassName: external-nginx
+  rules:
+    - host: mlflow.lastdanceuit.io.vn
+      http:
+        paths:
+          - path: /invocations
+            pathType: Prefix
+            backend:
+              service:
+                name: fraud-detection-model-svc
+                port:
+                  number: 8080
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: fraud-detection-model-svc
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - mlflow.lastdanceuit.io.vn
+      secretName: mlflow-lastdanceuit-io-vn
