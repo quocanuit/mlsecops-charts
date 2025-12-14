@@ -32,7 +32,7 @@ spec:
         - chart: prometheus
           name: prometheus
           repo: https://prometheus-community.github.io/helm-charts
-          revision: 1.16.3
+          revision: 27.50.1
           namespace: default
 
   template:
