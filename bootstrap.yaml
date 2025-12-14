@@ -35,6 +35,12 @@ spec:
           revision: 27.50.1
           namespace: default
 
+        - chart: grafana
+          name: grafana
+          repo: https://grafana.github.io/helm-charts
+          revision: 10.3.0
+          namespace: default
+
   template:
     metadata:
       name: '{{.name}}'
