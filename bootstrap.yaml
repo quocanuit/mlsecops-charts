@@ -29,6 +29,12 @@ spec:
           namespace: mlflow
           postInstall: true
 
+        - chart: prometheus
+          name: prometheus
+          repo: https://prometheus-community.github.io/helm-charts
+          revision: 27.50.1
+          namespace: default
+
   template:
     metadata:
       name: '{{.name}}'
