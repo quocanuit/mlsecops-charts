@@ -882,8 +882,8 @@ dashboards:
                 "overrides": []
               },
               "gridPos": {
-                "h": 9,
-                "w": 12,
+                "h": 12,
+                "w": 24,
                 "x": 0,
                 "y": 0
               },
@@ -941,10 +941,10 @@ dashboards:
                 "overrides": []
               },
               "gridPos": {
-                "h": 9,
-                "w": 12,
-                "x": 12,
-                "y": 0
+                "h": 12,
+                "w": 24,
+                "x": 0,
+                "y": 12
               },
               "id": 2,
               "options": {
@@ -981,7 +981,10 @@ dashboards:
             "from": "now-1h",
             "to": "now"
           },
-          "timepicker": {},
+          "timepicker": {
+            "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"]
+          },
+          "refresh": "5s",
           "timezone": "",
           "title": "Argo Workflows Monitoring",
           "uid": "argo-workflows-monitoring",
