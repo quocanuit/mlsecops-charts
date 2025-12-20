@@ -110,3 +110,53 @@ spec:
     - hosts:
         - mlflow.lastdanceuit.io.vn
       secretName: mlflow-lastdanceuit-io-vn
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: prometheus
+  annotations:
+    cert-manager.io/cluster-issuer: http-01-production
+spec:
+  ingressClassName: external-nginx
+  rules:
+    - host: prometheus.lastdanceuit.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-server
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - prometheus.lastdanceuit.io.vn
+      secretName: prometheus-lastdanceuit-io-vn
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: grafana
+  annotations:
+    cert-manager.io/cluster-issuer: http-01-production
+spec:
+  ingressClassName: external-nginx
+  rules:
+    - host: grafana.lastdanceuit.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - grafana.lastdanceuit.io.vn
+      secretName: grafana-lastdanceuit-io-vn
