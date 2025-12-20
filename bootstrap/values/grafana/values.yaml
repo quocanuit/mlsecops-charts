@@ -661,15 +661,15 @@ plugins: []
 ## Configure grafana datasources
 ## ref: http://docs.grafana.org/administration/provisioning/#datasources
 ##
-datasources: {}
-#  datasources.yaml:
-#    apiVersion: 1
-#    datasources:
-#    - name: Prometheus
-#      type: prometheus
-#      url: http://prometheus-prometheus-server
-#      access: proxy
-#      isDefault: true
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server:80
+      access: proxy
+      isDefault: true
 #    - name: CloudWatch
 #      type: cloudwatch
 #      access: proxy
@@ -797,18 +797,18 @@ notifiers: {}
 ##
 ## `path` must be /var/lib/grafana/dashboards/<provider_name>
 ##
-dashboardProviders: {}
-#  dashboardproviders.yaml:
-#    apiVersion: 1
-#    providers:
-#    - name: 'default'
-#      orgId: 1
-#      folder: ''
-#      type: file
-#      disableDeletion: false
-#      editable: true
-#      options:
-#        path: /var/lib/grafana/dashboards/default
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
 
 ## Configure how curl fetches remote dashboards. The beginning dash is required.
 ## NOTE: This sets the default short flags for all dashboards, but these
@@ -828,7 +828,246 @@ defaultCurlOptions: "-skf"
 ##
 ## dashboards per provider, use provider name as key.
 ##
-dashboards: {}
+dashboards:
+  default:
+    argo-workflows-memory:
+      json: |
+        {
+          "annotations": {
+            "list": [
+              {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+              }
+            ]
+          },
+          "editable": true,
+          "gnetId": null,
+          "graphTooltip": 0,
+          "id": null,
+          "links": [],
+          "panels": [
+            {
+              "datasource": "Prometheus",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 10,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "decmbytes"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 0,
+                "y": 0
+              },
+              "id": 2,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom"
+                },
+                "tooltip": {
+                  "mode": "single"
+                }
+              },
+              "pluginVersion": "8.0.0",
+              "targets": [
+                {
+                  "expr": "sum by (pod) (\n  container_memory_working_set_bytes{\n    namespace=\"argo-workflows\",\n    container!=\"\",\n    container!=\"POD\"\n  }\n) / 1024 / 1024",
+                  "refId": "A"
+                }
+              ],
+              "title": "Argo Workflows - Memory Usage by Pod",
+              "type": "timeseries"
+            }
+          ],
+          "schemaVersion": 27,
+          "style": "dark",
+          "tags": ["argo-workflows", "memory"],
+          "templating": {
+            "list": []
+          },
+          "time": {
+            "from": "now-6h",
+            "to": "now"
+          },
+          "timepicker": {},
+          "timezone": "",
+          "title": "Argo Workflows - Memory Usage",
+          "uid": "argo-workflows-memory",
+          "version": 0
+        }
+    argo-workflows-cpu:
+      json: |
+        {
+          "annotations": {
+            "list": [
+              {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+              }
+            ]
+          },
+          "editable": true,
+          "gnetId": null,
+          "graphTooltip": 0,
+          "id": null,
+          "links": [],
+          "panels": [
+            {
+              "datasource": "Prometheus",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 10,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 0,
+                "y": 0
+              },
+              "id": 2,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom"
+                },
+                "tooltip": {
+                  "mode": "single"
+                }
+              },
+              "pluginVersion": "8.0.0",
+              "targets": [
+                {
+                  "expr": "sum by (pod) (\n  rate(container_cpu_usage_seconds_total{\n    namespace=\"argo-workflows\",\n    container!=\"\",\n    container!=\"POD\"\n  }[5m])\n)",
+                  "refId": "A"
+                }
+              ],
+              "title": "Argo Workflows - CPU Usage Rate by Pod",
+              "type": "timeseries"
+            }
+          ],
+          "schemaVersion": 27,
+          "style": "dark",
+          "tags": ["argo-workflows", "cpu"],
+          "templating": {
+            "list": []
+          },
+          "time": {
+            "from": "now-6h",
+            "to": "now"
+          },
+          "timepicker": {},
+          "timezone": "",
+          "title": "Argo Workflows - CPU Usage",
+          "uid": "argo-workflows-cpu",
+          "version": 0
+        }
   # default:
   #   some-dashboard:
   #     json: |
