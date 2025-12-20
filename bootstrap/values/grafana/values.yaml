@@ -830,7 +830,7 @@ defaultCurlOptions: "-skf"
 ##
 dashboards:
   default:
-    argo-workflows-memory:
+    argo-workflows-monitoring:
       json: |
         {
           "annotations": {
@@ -857,35 +857,7 @@ dashboards:
               "fieldConfig": {
                 "defaults": {
                   "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 10,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "tooltip": false,
-                      "viz": false,
-                      "legend": false
-                    },
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
+                    "mode": "thresholds"
                   },
                   "mappings": [],
                   "thresholds": {
@@ -896,8 +868,12 @@ dashboards:
                         "value": null
                       },
                       {
+                        "color": "yellow",
+                        "value": 512
+                      },
+                      {
                         "color": "red",
-                        "value": 80
+                        "value": 1024
                       }
                     ]
                   },
@@ -911,100 +887,36 @@ dashboards:
                 "x": 0,
                 "y": 0
               },
-              "id": 2,
+              "id": 1,
               "options": {
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom"
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                  "values": false,
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": ""
                 },
-                "tooltip": {
-                  "mode": "single"
-                }
+                "showUnfilled": true
               },
               "pluginVersion": "8.0.0",
               "targets": [
                 {
                   "expr": "sum by (pod) (\n  container_memory_working_set_bytes{\n    namespace=\"argo-workflows\",\n    container!=\"\",\n    container!=\"POD\"\n  }\n) / 1024 / 1024",
-                  "refId": "A"
+                  "refId": "A",
+                  "legendFormat": "{{pod}}"
                 }
               ],
-              "title": "Argo Workflows - Memory Usage by Pod",
-              "type": "timeseries"
-            }
-          ],
-          "schemaVersion": 27,
-          "style": "dark",
-          "tags": ["argo-workflows", "memory"],
-          "templating": {
-            "list": []
-          },
-          "time": {
-            "from": "now-6h",
-            "to": "now"
-          },
-          "timepicker": {},
-          "timezone": "",
-          "title": "Argo Workflows - Memory Usage",
-          "uid": "argo-workflows-memory",
-          "version": 0
-        }
-    argo-workflows-cpu:
-      json: |
-        {
-          "annotations": {
-            "list": [
-              {
-                "builtIn": 1,
-                "datasource": "-- Grafana --",
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "type": "dashboard"
-              }
-            ]
-          },
-          "editable": true,
-          "gnetId": null,
-          "graphTooltip": 0,
-          "id": null,
-          "links": [],
-          "panels": [
+              "title": "Memory Usage by Pod (MB)",
+              "type": "bargauge"
+            },
             {
               "datasource": "Prometheus",
               "fieldConfig": {
                 "defaults": {
                   "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 10,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "tooltip": false,
-                      "viz": false,
-                      "legend": false
-                    },
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
+                    "mode": "thresholds"
                   },
                   "mappings": [],
                   "thresholds": {
@@ -1015,8 +927,12 @@ dashboards:
                         "value": null
                       },
                       {
+                        "color": "yellow",
+                        "value": 0.5
+                      },
+                      {
                         "color": "red",
-                        "value": 80
+                        "value": 1
                       }
                     ]
                   },
@@ -1027,45 +943,48 @@ dashboards:
               "gridPos": {
                 "h": 9,
                 "w": 12,
-                "x": 0,
+                "x": 12,
                 "y": 0
               },
               "id": 2,
               "options": {
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom"
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                  "values": false,
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": ""
                 },
-                "tooltip": {
-                  "mode": "single"
-                }
+                "showUnfilled": true
               },
               "pluginVersion": "8.0.0",
               "targets": [
                 {
                   "expr": "sum by (pod) (\n  rate(container_cpu_usage_seconds_total{\n    namespace=\"argo-workflows\",\n    container!=\"\",\n    container!=\"POD\"\n  }[5m])\n)",
-                  "refId": "A"
+                  "refId": "A",
+                  "legendFormat": "{{pod}}"
                 }
               ],
-              "title": "Argo Workflows - CPU Usage Rate by Pod",
-              "type": "timeseries"
+              "title": "CPU Usage Rate by Pod (cores)",
+              "type": "bargauge"
             }
           ],
           "schemaVersion": 27,
           "style": "dark",
-          "tags": ["argo-workflows", "cpu"],
+          "tags": ["argo-workflows", "monitoring"],
           "templating": {
             "list": []
           },
           "time": {
-            "from": "now-6h",
+            "from": "now-1h",
             "to": "now"
           },
           "timepicker": {},
           "timezone": "",
-          "title": "Argo Workflows - CPU Usage",
-          "uid": "argo-workflows-cpu",
+          "title": "Argo Workflows Monitoring",
+          "uid": "argo-workflows-monitoring",
           "version": 0
         }
   # default:
